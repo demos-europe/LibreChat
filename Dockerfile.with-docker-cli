@@ -1,0 +1,9 @@
+FROM ghcr.io/danny-avila/librechat-dev:latest
+
+USER root
+RUN apk add --no-cache docker-cli git
+
+USER node
+WORKDIR /app/api
+
+CMD ["node", "server/index.js"]
