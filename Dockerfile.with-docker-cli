@@ -3,19 +3,17 @@ FROM ghcr.io/danny-avila/librechat-dev:latest
 USER root
 RUN apk add --no-cache docker-cli git npm
 
-# Debug: show environment
-RUN echo "=== PATH ===" && echo "$PATH" && \
-    echo "=== npm ===" && (npm --version 2>&1 || echo "npm not found") && \
-    echo "=== node ===" && node --version && \
-    echo "=== node_modules/.bin ===" && (ls /app/node_modules/.bin/ 2>/dev/null | head -10 || echo "not found") && \
-    echo "=== client/node_modules ===" && (ls /app/client/node_modules/.bin/ 2>/dev/null | head -5 || echo "not found")
-
 # Copy approval system (custom additions)
 COPY --chown=node:node api/server/index.js /app/api/server/index.js
 COPY --chown=node:node api/server/routes/approval.js /app/api/server/routes/approval.js
 COPY --chown=node:node api/server/services/ApprovalService.js /app/api/server/services/ApprovalService.js
 COPY --chown=node:node client/src/App.jsx /app/client/src/App.jsx
 COPY --chown=node:node client/src/components/Approval /app/client/src/components/Approval
+
+# Rebuild frontend bundle with Approval components included
+# Base image has no client/node_modules (dev deps stripped) — install before building
+WORKDIR /app/client
+RUN npm install && npm run build
 
 USER node
 WORKDIR /app/api
