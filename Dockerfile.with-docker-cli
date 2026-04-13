@@ -3,6 +3,13 @@ FROM ghcr.io/danny-avila/librechat-dev:latest
 USER root
 RUN apk add --no-cache docker-cli git
 
+# Copy approval system (custom additions)
+COPY --chown=node:node api/server/index.js /app/api/server/index.js
+COPY --chown=node:node api/server/routes/approval.js /app/api/server/routes/approval.js
+COPY --chown=node:node api/server/services/ApprovalService.js /app/api/server/services/ApprovalService.js
+COPY --chown=node:node client/src/App.jsx /app/client/src/App.jsx
+COPY --chown=node:node client/src/components/Approval /app/client/src/components/Approval
+
 USER node
 WORKDIR /app/api
 
