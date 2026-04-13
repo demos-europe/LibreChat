@@ -160,7 +160,11 @@ class ApprovalService {
         }
 
         // ✅ USER ISOLATION: Validate that the responding user matches the request
-        if (response.userId && pending.request.userId && response.userId !== pending.request.userId) {
+        if (!response.userId || !pending.request.userId) {
+            console.error(`[ApprovalService] ⚠️  Missing userId in request or response — rejecting`);
+            return false;
+        }
+        if (response.userId !== pending.request.userId) {
             console.error(`[ApprovalService] ⚠️  Security violation: User '${response.userId}' attempted to respond to approval for user '${pending.request.userId}'`);
             return false;
         }

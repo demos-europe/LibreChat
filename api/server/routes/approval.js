@@ -67,13 +67,6 @@ async function getUserIdFromRequest(req) {
         }
     }
 
-    // Strategy 3: Query parameter (fallback, less secure)
-    if (req.query && req.query.userId) {
-        console.log('[Approval] DEBUG: Found userId via query parameter:', req.query.userId);
-        return req.query.userId;
-    }
-
-    console.log('[Approval] DEBUG: No userId found via any strategy!');
     return null;
 }
 
@@ -405,17 +398,13 @@ router.get('/whoami', async (req, res) => {
 
         // No userId found
         console.warn('[Approval] /whoami - No userId found via any method');
-        res.json({
-            userId: 'default-user',
-            method: 'fallback',
-            warning: 'No authentication found'
+        return res.status(401).json({
+            error: 'Unauthorized: No authentication found'
         });
     } catch (error) {
-        console.error('[Approval] /whoami error:', error);
+        console.error('[Approval] /whoami error:', error.message);
         res.status(500).json({
-            error: 'Internal server error',
-            message: error.message,
-            userId: 'default-user'
+            error: 'Internal server error'
         });
     }
 });
