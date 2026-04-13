@@ -10,6 +10,10 @@ COPY --chown=node:node api/server/services/ApprovalService.js /app/api/server/se
 COPY --chown=node:node client/src/App.jsx /app/client/src/App.jsx
 COPY --chown=node:node client/src/components/Approval /app/client/src/components/Approval
 
+# Rebuild the frontend bundle to include Approval components
+WORKDIR /app
+RUN npm run frontend
+
 USER node
 WORKDIR /app/api
 
