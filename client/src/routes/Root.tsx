@@ -22,6 +22,7 @@ import { UnifiedSidebar } from '~/components/UnifiedSidebar';
 import { TermsAndConditionsModal } from '~/components/ui';
 import { useHealthCheck } from '~/data-provider';
 import { Banner } from '~/components/Banners';
+import { ApprovalProvider } from '~/components/Approval';
 
 export default function Root() {
   const [showTerms, setShowTerms] = useState(false);
@@ -64,6 +65,7 @@ export default function Root() {
   }
 
   return (
+    <ApprovalProvider>
     <SetConvoProvider>
       <FileMapContext.Provider value={fileMap}>
         <AssistantsMapContext.Provider value={assistantsMap}>
@@ -101,5 +103,6 @@ export default function Root() {
         </AssistantsMapContext.Provider>
       </FileMapContext.Provider>
     </SetConvoProvider>
+    </ApprovalProvider>
   );
 }
