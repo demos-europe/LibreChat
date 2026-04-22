@@ -65,7 +65,13 @@ jobs:
         if: steps.merge.outputs.failed == 'true'
         run: exit 1
 
-      # ── 2. Approval-Check ─────────────────────────────────────────
+      # ── 2. Fork-README wiederherstellen ───────────────────────────
+      - name: Restore fork README
+        run: |
+          git checkout origin/main -- README.md
+          git diff --cached --quiet || git commit -m "chore: restore fork README after upstream merge"
+
+      # ── 3. Approval-Check ────────────────────────────────────────
       - name: Check approval integration
         id: approval
         run: |
@@ -103,7 +109,7 @@ jobs:
         if: steps.approval.outputs.failed == 'true'
         run: exit 1
 
-      # ── 3. Upstream-Workflows entfernen ───────────────────────────
+      # ── 4. Upstream-Workflows entfernen ───────────────────────────
       - name: Remove upstream-only workflows
         run: |
           changed=false
@@ -119,7 +125,7 @@ jobs:
           done
           $changed && git commit -m "chore: remove upstream-only workflows (${{ inputs.version }})" || true
 
-      # ── 4. Security Scan ──────────────────────────────────────────
+      # ── 5. Security Scan ──────────────────────────────────────────
       - name: Trivy security scan
         id: trivy
         uses: aquasecurity/trivy-action@0.29.0
@@ -132,7 +138,7 @@ jobs:
           severity: CRITICAL,HIGH
           exit-code: '1'
 
-      # ── 5. PR erstellen ───────────────────────────────────────────
+      # ── 6. PR erstellen ───────────────────────────────────────────
       - name: Push branch
         run: git push origin sync/upstream-${{ inputs.version }}
 
