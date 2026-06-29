@@ -19,6 +19,14 @@ describe('inferMimeType', () => {
     expect(inferMimeType('test.py', 'text/x-python-script')).toBe('text/x-python');
   });
 
+  it('should normalize text/x-markdown to text/markdown', () => {
+    expect(inferMimeType('test.md', 'text/x-markdown')).toBe('text/markdown');
+  });
+
+  it('should normalize application/x-zip-compressed to application/zip', () => {
+    expect(inferMimeType('archive.zip', 'application/x-zip-compressed')).toBe('application/zip');
+  });
+
   it('should return a type that matches textMimeTypes after normalization', () => {
     const normalized = inferMimeType('test.py', 'text/x-python-script');
     expect(textMimeTypes.test(normalized)).toBe(true);
@@ -32,6 +40,7 @@ describe('inferMimeType', () => {
   it('should infer from extension when browser type is empty', () => {
     expect(inferMimeType('test.py', '')).toBe('text/x-python');
     expect(inferMimeType('code.js', '')).toBe('text/javascript');
+    expect(inferMimeType('archive.zip', '')).toBe('application/zip');
     expect(inferMimeType('photo.heic', '')).toBe('image/heic');
     expect(inferMimeType('Main.java', '')).toBe('text/x-java');
   });
@@ -45,8 +54,17 @@ describe('inferMimeType', () => {
     expect(baseFileConfig.checkType(normalized)).toBe(true);
   });
 
+  it('should produce a type accepted by checkType after normalizing text/x-markdown', () => {
+    const normalized = inferMimeType('test.md', 'text/x-markdown');
+    expect(baseFileConfig.checkType(normalized)).toBe(true);
+  });
+
   it('should reject raw text/x-python-script without normalization', () => {
     expect(baseFileConfig.checkType('text/x-python-script')).toBe(false);
+  });
+
+  it('should reject raw text/x-markdown without normalization', () => {
+    expect(baseFileConfig.checkType('text/x-markdown')).toBe(false);
   });
 });
 
@@ -69,6 +87,7 @@ describe('applicationMimeTypes', () => {
     'application/msword',
     'application/xml',
     'application/zip',
+    'application/x-zip-compressed',
     'application/epub+zip',
     'application/x-tar',
     'application/x-sh',
@@ -821,6 +840,22 @@ describe('getEndpointFileConfig', () => {
       expect(result.fileLimit).toBe(5);
       /** Should convert MB to bytes */
       expect(result.fileSizeLimit).toBe(10 * 1024 * 1024);
+    });
+
+    it('should convert skills fileSizeLimit from MB to bytes', () => {
+      const merged = mergeFileConfig({
+        skills: {
+          fileSizeLimit: 15,
+        },
+      });
+
+      expect(merged.skills?.fileSizeLimit).toBe(15 * 1024 * 1024);
+    });
+
+    it('should default skills fileSizeLimit to 50 MB', () => {
+      const merged = mergeFileConfig(undefined);
+
+      expect(merged.skills?.fileSizeLimit).toBe(50 * 1024 * 1024);
     });
 
     it('should preserve disabled: false in merged config', () => {
